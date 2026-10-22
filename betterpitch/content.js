@@ -186,6 +186,8 @@
     // Never touch inline script data: Next.js RSC rows are length-prefixed.
     const p = node.parentNode;
     if (!p || /^(SCRIPT|STYLE|NOSCRIPT|TEMPLATE)$/.test(p.nodeName)) return;
+    // single words that polish.js splits a heading into for its reveal (already swapped)
+    if (p.nodeType === 1 && p.classList.contains('bp-w')) return;
     if (done.get(node) === node.nodeValue) return;
     const raw = node.nodeValue;
     const key = norm(raw);

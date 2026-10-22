@@ -20,6 +20,7 @@
   const HTML = `
 <div class="bph-box">
   <div class="bph-tiles" aria-hidden="true"></div>
+  <div class="bph-motes" aria-hidden="true"></div>
   <div class="bph-wrap bph-grid">
     <div class="bph-copy">
       <span class="bph-pill bph-enter" style="--d:.05s"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 3.5 11.6 8.4 16.5 10 11.6 11.6 10 16.5 8.4 11.6 3.5 10 8.4 8.4z"/><path d="M18 3v4M16 5h4M18 16v4M16 18h4"/></svg>The First AI Revenue Engine Built For Service Businesses</span>
@@ -147,6 +148,21 @@
       b.style.setProperty('--dur', (.35 + Math.random() * .4).toFixed(2) + 's');
       b.style.animationDelay = (-Math.random()).toFixed(2) + 's';
       w.appendChild(b);
+    }
+
+    // glowing motes drifting up through the hero, in the three neon colours
+    const motes = $('.bph-motes'), hues = ['rgba(168,85,247,.9)', 'rgba(59,130,246,.9)', 'rgba(34,211,238,.9)'];
+    for (let i = 0; i < 14; i++) {
+      const m = document.createElement('i');
+      const set = (k, v) => m.style.setProperty(k, v);
+      set('--x', (4 + Math.random() * 92).toFixed(1) + '%');
+      set('--y', (10 + Math.random() * 75).toFixed(1) + '%');
+      set('--s', (6 + Math.random() * 14).toFixed(0) + 'px');
+      set('--c', hues[i % 3]);
+      set('--t', (7 + Math.random() * 7).toFixed(1) + 's');
+      set('--dl', (-Math.random() * 10).toFixed(1) + 's');
+      set('--dx', ((Math.random() - .5) * 60).toFixed(0) + 'px');
+      motes.appendChild(m);
     }
 
     // animated tile grid that blooms outwards from the centre and glows under the pointer

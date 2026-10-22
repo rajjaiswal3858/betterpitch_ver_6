@@ -1,0 +1,44 @@
+/* Dark neon palette for the chat panel's iframe (a separate app, see server.js).
+   The app already ships a dark mode under :root[data-theme=dark]; this applies
+   the same token set unconditionally, retinted to the site's void / violet /
+   cyan palette. :root:root:root outranks both of the app's :root blocks. */
+:root:root:root{
+  color-scheme:dark;
+  --color-white:#0d0b18;
+  --color-off-white:#05040a;
+  --color-white-200:#141126;
+  --color-black:#f6f5fc;
+  --color-gray-50:#171428;
+  --color-gray-100:#1c1930;
+  --color-gray-200:#2a2640;
+  --color-gray-300:#4a4659;
+  --color-gray-400:#8a879e;
+  --color-gray-500:#a6a3b8;
+  --color-gray-600:#c2bfd1;
+  --color-gray-700:#ebe9f5;
+  --color-gray-800:#f6f5fc;
+  --color-gray-900:#f6f5fc;
+  --color-gray-950:#f6f5fc;
+  --color-gray-subtler:#171428;
+  --color-gray-subtle:#2a2640;
+  --color-gray-extra-light:#8a879e;
+  --color-gray-light:#a6a3b8;
+  --color-gray-default:#c2bfd1;
+  --color-gray-dark:#ebe9f5;
+  --color-brand-subtler:#1f1838;
+  --color-brand-subtle:#2e2452;
+  --color-brand-extra-light:#6d5bd0;
+  --color-brand-light:#a78bfa;
+  --color-brand-default:#8b5cf6;
+  --color-brand-dark:#7c3aed;
+  /* text that sits on brand or dark fills stays white */
+  --color-text-content-button-primary-default:#fff;
+  --color-text-content-button-primary-disabled:#fff;
+  --color-text-content-button-danger-default:#fff;
+  --color-text-content-button-danger-disabled:#fff;
+  --color-text-content-button-dark-default:#05040a;
+  --color-text-content-navigation-selected-default:#fff;
+  --color-text-content-static-warm:#a6a3b8;
+}
+html,body{background:#05040a}
+::selection{background:rgba(139,92,246,.45);color:#fff}

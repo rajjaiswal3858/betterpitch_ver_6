@@ -105,7 +105,7 @@ function lookup(u) {
   return extByPath[u.pathname] || null;
 }
 
-function send(res, entry) {
+function send(res, entry, pathname = '') {
   let body = fs.readFileSync(path.join(ARCHIVE, 'files', entry.file));
   if (TEXT_RE.test(entry.type)) body = rewrite(body);
   const headers = { 'content-type': entry.type || 'application/octet-stream', 'cache-control': 'no-cache' };
@@ -114,23 +114,35 @@ function send(res, entry) {
     // BetterPitch copy is swapped in on the client (betterpitch/content.js) so the
     // recorded markup and RSC payloads stay byte-identical.
     // The home page's first section (hero.js), the colour theme (theme.css) and the
-    // design layer (polish.css/js: type, surfaces, hovers, reveals, smooth scroll)
-    // are added the same way.
-    body = body.replace('</head>', '<link rel="stylesheet" href="/__bp/theme.css"><link rel="stylesheet" href="/__bp/polish.css"><script src="/__bp/content.js"></script>'
-      + '<script src="/__bp/hero.js"></script><script src="/__bp/lenis.js" defer></script><script src="/__bp/polish.js" defer></script></head>');
+    // design layer (polish.css/js: type, surfaces, motion, smooth scroll) are
+    // added the same way. The chat panel's iframe is a separate app with its own
+    // design tokens: it gets the copy and its own dark palette (chat.css) only.
+    const chatFrame = /^\/(__ext\/+dashboard\.artisan\.co\/)?embed\//.test(pathname);
+    body = body.replace('</head>', chatFrame
+      ? '<link rel="stylesheet" href="/__bp/chat.css"><script src="/__bp/content.js"></script></head>'
+      : '<link rel="stylesheet" href="/__bp/theme.css"><link rel="stylesheet" href="/__bp/polish.css"><script src="/__bp/content.js"></script>'
+      + '<script src="/__bp/hero.js"></script><script src="/__bp/lenis.js" defer></script>'
+      + '<script src="/__bp/gsap.js" defer></script><script src="/__bp/ScrollTrigger.js" defer></script><script src="/__bp/polish.js" defer></script></head>');
   }
   res.writeHead(entry.status, headers);
   res.end(body);
 }
 
-http.createServer((req, res) => {
+// The request handler, exported so a Vercel function (api/index.js) can serve the
+// same archive; run directly (npm start) it listens on PORT as before.
+function handler(req, res) {
   const u = new URL(req.url, 'http://localhost');
   // Analytics endpoints (PostHog proxy) - answer with an empty success so nothing errors.
-  // BetterPitch layer: betterpitch/*.js|css, plus Lenis from node_modules (CDNs are blocked by the CSP).
+  // BetterPitch layer: betterpitch/*.js|css, plus Lenis and GSAP from node_modules (CDNs are blocked by the CSP).
   if (u.pathname.startsWith('/__bp/')) {
     const name = path.basename(u.pathname);
-    const file = name === 'lenis.js'
-      ? path.join(__dirname, 'node_modules', 'lenis', 'dist', 'lenis.min.js')
+    const vendor = {
+      'lenis.js': ['lenis', 'dist', 'lenis.min.js'],
+      'gsap.js': ['gsap', 'dist', 'gsap.min.js'],
+      'ScrollTrigger.js': ['gsap', 'dist', 'ScrollTrigger.min.js'],
+    }[name];
+    const file = vendor
+      ? path.join(__dirname, 'node_modules', ...vendor)
       : path.join(__dirname, 'betterpitch', name);
     const type = { '.js': 'application/javascript', '.css': 'text/css' }[path.extname(name)];
     if (!type || !fs.existsSync(file)) {
@@ -149,7 +161,7 @@ http.createServer((req, res) => {
     // panel renders as it does live. Anything else - sending a message, starting
     // a call - needs Artisan's live AI backend, which only accepts artisan.co.
     const k = 'POST ' + u.pathname.replace(/^\/__ext\/+/, '');
-    if (manifest[k]) return send(res, manifest[k]);
+    if (manifest[k]) return send(res, manifest[k], u.pathname);
     if (k.includes(CHAT_API)) {
       res.writeHead(503, { 'content-type': 'application/json' });
       return res.end(JSON.stringify({ success: false, error: { code: 'OFFLINE_REPLICA', message: 'Chat is not available in the local replica.' } }));
@@ -166,5 +178,10 @@ http.createServer((req, res) => {
     res.writeHead(404, { 'content-type': 'text/plain' });
     return res.end('Not in archive: ' + u.pathname + u.search + '\nRun: node capture.js ' + u.pathname);
   }
-  send(res, manifest[key]);
-}).listen(PORT, () => console.log(`Artisan replica running at http://localhost:${PORT}`));
+  send(res, manifest[key], u.pathname);
+}
+
+module.exports = handler;
+if (require.main === module) {
+  http.createServer(handler).listen(PORT, () => console.log(`Artisan replica running at http://localhost:${PORT}`));
+}

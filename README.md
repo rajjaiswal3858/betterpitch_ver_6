@@ -9,6 +9,12 @@ Next.js JavaScript, animations, menus and images all work.
     npm install      # first time only
     npm start        # -> http://localhost:4000
 
+## Deploy (Vercel)
+
+`vercel.json` rewrites every path to `api/index.js`, which serves the same
+handler as `npm start` (`server.js` exports it) with `archive/` and
+`betterpitch/` bundled into the function.
+
 ## Commands
 
 | Command | What it does |
