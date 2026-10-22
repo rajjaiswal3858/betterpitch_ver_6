@@ -1,12 +1,13 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "buildCommand": "",
-  "outputDirectory": "public",
-  "rewrites": [{ "source": "/(.*)", "destination": "/api" }],
-  "functions": {
-    "api/index.js": {
-      "includeFiles": "{archive/**,betterpitch/**,node_modules/lenis/dist/**,node_modules/gsap/dist/**}",
-      "maxDuration": 30
+  "builds": [
+    {
+      "src": "api/index.js",
+      "use": "@vercel/node",
+      "config": {
+        "includeFiles": ["archive/**", "betterpitch/**", "node_modules/lenis/dist/**", "node_modules/gsap/dist/**"]
+      }
     }
-  }
+  ],
+  "routes": [{ "src": "/(.*)", "dest": "/api/index.js" }]
 }
